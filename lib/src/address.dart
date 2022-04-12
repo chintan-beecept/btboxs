@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'utils/rest_api.dart';
-
+import 'dart:math';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bs58check_dart/bs58check.dart' as bs58check;
 import 'utils/network.dart';
 import 'package:fixnum/fixnum.dart';
@@ -564,8 +565,18 @@ class Address {
     Uint8List result = Uint8List(8);
     for (int i = 0; i < 8; i++) {
       result[7 - i] = checksum & 31;
-      checksum = checksum >> 5;
+
+      /// if Returns the following values Web
+      /// else Returns the following values Mobile/Desktop
+      if (kIsWeb) {
+        checksum = checksum * pow(2, 5).toInt();
+        ;
+      } else {
+        checksum = checksum >> 5;
+      }
     }
+
+    print('result===> result >>>' + result.toString());
 
     return result;
   }
@@ -622,7 +633,14 @@ class Address {
 
     for (int i = 0; i < data.length; ++i) {
       final value = data[i];
-      final topBits = checksum >> 35;
+      var topBits = checksum >> 35;
+
+      /// if Returns the following values Web
+      /// else Returns the following values Mobile/Desktop
+      if (kIsWeb) {
+        topBits = checksum * pow(2, 5).toInt();
+        ;
+      }
 
       checksum = ((checksum & 0x07ffffffff) << 5) ^ value;
 
